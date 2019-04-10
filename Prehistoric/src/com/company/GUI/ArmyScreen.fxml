@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="482.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.company.GUI.ArmyScreen">
+  <children>
+    <ListView fx:id="armory" layoutX="14.0" layoutY="32.0" prefHeight="344.0" prefWidth="227.0" />
+    <Label layoutX="14.0" layoutY="14.0" prefHeight="18.0" prefWidth="155.0" text="Equipment in armory" />
+    <ListView fx:id="armyEquipment" layoutX="319.0" layoutY="32.0" prefHeight="344.0" prefWidth="241.0" />
+    <Label layoutX="319.0" layoutY="13.0" prefHeight="18.000091552734375" prefWidth="155.0" text="Equipment in the army" />
+    <Button layoutX="261.0" layoutY="88.0" mnemonicParsing="false" onAction="#moveEquipmentToArmory" prefWidth="37.0" text="&lt;" />
+    <Button layoutX="261.0" layoutY="120.0" mnemonicParsing="false" onAction="#moveAllToArmory" text="&lt;&lt;" />
+    <Button layoutX="261.0" layoutY="154.0" minWidth="27.0" mnemonicParsing="false" onAction="#moveEquipmentToArmy" prefWidth="37.0" text="&gt;" />
+    <Button layoutX="261.0" layoutY="185.0" mnemonicParsing="false" onAction="#moveAllToArmy" text="&gt;&gt;" />
+    <CheckBox layoutX="14.0" layoutY="398.0" mnemonicParsing="false" text="Attack strangers" />
+  </children>
+</AnchorPane>

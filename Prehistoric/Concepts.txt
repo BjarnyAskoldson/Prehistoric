@@ -1,0 +1,83 @@
+1) Resource->IProducible (many to many?)
+
+Resources: 
+Arable land
+Wild game
+Wild <kind of cattle>
+Wild <kind of domesticable plant>
+Wood
+Stone
+Flint
+Copper
+Tin
+Iron
+Coal
+Oil
+Aluminium
+Uran
+
+2) Enterprices compete with crafters; wages there = avg income of crafter; effectiveness higher due to machinery. Difference = profit.
+
+----Summary
+
+1) Each player has a bunch of settlements. Settlement includes trade center (with most of population) and working hexes (with farmers, - resource gatherers). Trade center contains:
+
+1.1) a set of enterprises //working groups, - crafters, builders, traders. 
+1.2) has a storage with food reserve
+1.3) armory. 
+1.4) garrisoned army. 
+
+2) Either trade center or working hex can have enterprises. For town center:
+2.0) (available from beginning) Farms; Crafters' workshops
+2.1) Trade ships (product, - trade volume)
+2.2) Water mills (goods);
+2.3) Smelters (bronze or iron);
+2.4) factories (goods);
+2.5) automated plants (goods);
+2.6) high-tech plants (?)
+
+Work hexes may have: 
+2.6) Mines (resources);
+2.7) Mills (food? by percentage?);
+2.9) lumber mills (timber);
+
+3) Each year every work group gets an income. Income is limited by group max product (baced on tool effectiveness), demand on its products, and (for gatherers) by resource available. Also, population is distributed by wealth levels. If income covers expenses of a given wealth level, unspent part of it goes into wealth level upgrade (if available) or into investment pool. Investments are converted into enterprices. If income doesn't cover wealth level's expenses, wealth level is downgraded. 
+
+4) Investment amount distributed per ratio by demand on enterprises' products. Enterprices have higher tools' effectiveness, due to special tools not available for crafters
+
+5) Wealth level upgrades set a demand on builders' product
+
+6) Each settlement has a manufactoring competitive power. It depends on:
+6.1) Tools' effectiveness (the higher the better)
+6.2) Wealth level (the lower the better)
+6.3) Set of bonuces (From technologies, abundance of resources, special resources,  etc.)
+6.4) Non-matching cash crops, rare resources etc. create additional goods flow, regardless of competitive power
+6.5) For high-tech, - stongly based on technologies + education level (?)
+
+7) Each settlement has a trade radius, depending on technology. It can establish a trade route with any city within it. Once it is done, competitive power of settlements compared, and trade balance calculated. Settlement with better one sells more and gets profit. If each city within trade radius of other, trade competitive power compared; the city with bigger one gets trade jobs.
+
+8) Enterprise includes the following:
+8.1) Main asset (transport, machinery etc.). Has high tool effectiveness
+8.2) Employees. Everyone has an income = constant from tool/main asset? //avg income of the settlement
+8.3) Profit = product - sum of salaries. If positive, taxable.
+8.4) Starts with minimal size; if profitable and has labor pool, expands. In case of losses shrinks.
+8.5) Resources to consume (list; includes land (to build on)
+8.6) May have housing capacity (?)
+
+9) People have education. It defines scientific product (speed of technology advances) and competitiveness of high-tech. Education defined by infrastruture provided by government, and wealth level
+
+
+10) state taxes everybody, and:
+10.1) Order weapons (increasing crafters' income)
+10.2) hires soldiers;
+10.3) Send armies to acquire work hexes, or attack enemies' settlements
+10.4) Build infrastructure, - roads, educational facilities, medical facilities
+
+11) Army can have a campaign plan (sequence of hexes to attack), or be led by a ruler. Hexes can be either sacked, or conquered (army leaves the harrison until assimilated). 
+
+
+
+
+
+
+

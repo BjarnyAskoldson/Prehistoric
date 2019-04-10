@@ -1,0 +1,130 @@
+Prehistoric issues to resolve
+
+1) Too big population (>20000 with 4000 food produced);
+
+2) How to put hex info on map so as it wouldn't block hexes? Allow to span to non-used locations?
+
+3) No weavers/carpenters in village  - fixed (for crafters, - merged profession)
+4) No miners/flint tools (fixed)
+5) Flint axes can be ordered without flint (is it OK? They are not produced, just oredered)
+6) Flint doesn't exhaust (leave it for now, - to decide)
+7) Save/load is broken again (fixed)
+8) Stone tools produced despite being a default tool (fixed)
+9) Update formula for static groups/ resource gathering (consider tools, laboriousness etc.)
+10) "Close" menu item doesn't work
+11) Player can abandon AI's work camps (fixed)
+12) Merge Armourer into Crafter profession, - calculate share of weaponry in crafter's product
+13) Army cannot attack rural areas (done)
+14) Add army speed, - currently it is 1 tile per year, supposed to be more
+15) Add reports on techs, battles (reread JavaFX book? And revisit fxml, - do we need it, or can we create scenes manually?)
+16) Working group currently produces all commodities it can simultaneously, without dividing labor between tasks (fixed?)
+17) AI cities have too few people (fixed)
+18) Player's treasury is huge (fixed)
+19) After removal of patrol we cannot reassign the troops to new hex (fixed)
+20) negative army numbers (fixed? Was caused by negative unemployed); 
+21) crazy amounts of flint tools in store (fixed)
+22) Consumable commodities added into settlement.commodity (fixed)
+23) AI creates number of expeditions into the same hex (fixed)
+24) AI doesn't colonise hexes after 1st one (fixed)
+25) No crafters for player (fixed)
+26) Player can colonise hex worked by AI (fixed)
+27) working groups continue to move after camp abandoned (fixed)
+28) After reload dynamic objects are not reflected (fixed)
+29) Link housing commodities to wealth levels; - drop commodities at all? (To add IProducible tools instead; make wealthLevel IProducible)
+30) Calculate start wealth levels for new borns;
+31) Wealth levels are not populated; (fixed)
+32) Crazy numbers on wealth levels; (fixed)
+33) Add leftovers from accumulated wealth for the group for the next turn (fixed)
+34) Check/fix workgoup income (done? - to test)
+35) demand on everything = 1 per capita, to fix (fixed)
+36) labor force checked twice, - in maximalCommodityPerTurn and commodityPerTurn (fixed?)
+37) hunters doesn't buy properties (remove them, anyway)
+38) new people distribution is not linked to income (probably OK? Distributed per rata based on uncovered demand)
+39) People's income not shown on settlement's screen
+40) Farmers not limited to resources (peopleMax = 1000);
+41) Crazy amount of people in Wealth levels - To distribute starvations by wealth level!!! (fixed);
+42) Wealth levels headcount <> people in the village (fixed)
+43) More than 1 farmer per tile (fixed)
+44) Starvations on sufficient food supply (fixed, - allowed to accumulate food)
+45) To link demand on tools, resources to unspent part of income. 
+45.1) Make sure no resources are consumable (fixed)
+46) Negative amount of unemployed (fixed)
+47) To decide, - do we need to calculate prices? Exluded food from prices' calculation for now
+48) 50 farmers produces 1000 food, - due to idle people yield. To remove? - fixed
+49) No builders, houses (houses are there, without builders) - fixed
+50) To link demand on craft goods to wealth levels (fixed)
+51) Farmers' max size needs to be sum of resources, not 1st resource (fixed)
+52) To limit house upgrades by builder's labor available
+53) Too many crafters, - why not bankrupt? - fixed
+54) People don't go farming during starvations - fixed
+55) Weapon's orders broken after crafters and armorers' merge
+56) TO ADD SECTORS/ENTERPRISES, - done
+57) To consider technology and trade in settlement.getBestAsset() method (tech done)
+58) To establish new enterprises in the sector - done
+59) To limit new enterprises by resources
+60) To resolve contradiction between resources/commodities like timber, copper. Make Timber a resource, and allow to collect?
+61) If removing WorkingGroups, what to do with Wealth Levels? Are they to be in Settlement or in Sector? - probably sector, to be affected by sector-specific issues/boosts - solved, - leaving Working Groups in place.
+62) To decide what enterprises upgrade first, - worst, best? Currently random (iterating in (alphabetical?) order)
+63) Starvations with sufficient food supply
+64) Negative numbers of unemployed, - starvation doesn't affect working groups? - fixed (except rounding)
+65) People doesn't set priority on food, even when starving - fixed
+66) Crazy amount of enterprises in Agriculture, with little outcome - fixed
+67) No sectors other than agriculture - fixed
+68) Set M2M between assets and enterprises - fixed
+69) Limit settlement's best asset by resources
+70) WorkGorup.enterpise items added in non-unique way (new instances of existing type/asset combination) - fixed
+71) Starvations on working farms; - fixed
+72) No builders  - fixed
+72.1) new enterprises/houses are built without builders - fixed
+73) no houses - fixed
+74) 2 Agriculture groups on the central tile - fixed
+75) No preference for food industires during starvation, thus unnecessary starvations before run out of agricultural resources
+76) farms without arable land - no limit on enterprises by resources? - fixed
+77) Too much light industry - fixed
+78) houses can be built without wood
+79) Potentially mixed meaning for IProducible.getSector(), - in some cases, it is sector that produces the item, in some, - sector where item will be used (Assets?) - may be OK, Assets are OK
+80) Investments and new joiners are based on demand share, - probable should be uncovered demand share
+
+Ideas to do:
+1) Active Object window, - to show city/army/etc. currently selected, to replace "Selected Army" choice box? (done)
+2) Add Assets: every citizen has income (share in the crafted good sold, harvest, share in income from trade route etc.) and expenses (based on consumption level? For now constant). The difference is accumulated as assets (different kinds? Cattle, ships, banking capital etc, - if so, how to decide what to buy? Calculate profit % for each? Or % is constant, but cattle is limited by pastures' amount (?), ships, - by trade routes' volume) Or everybody buy houses, farmers, - cattle, traders, - ships? Any difference with non-consumable commodities? - yes, can generate income (cattle only?). Bigger multiworker assets, - ships, etc. make a commercial enterprise 
+3) Army must have patrol missions, to protect rural areas and tax them, - done
+4) Create full-scale AI (later, once we have a base of gampelay, to avoid redesigns. Can teach AI to patrol hexes though, for tests, - done)
+5) Create JUnit coverage
+6) Add diseases as a reason of death (for overcrowded urban hexes)
+7) Tools' technology chain: stone/flint-bronze-iron-steel-mechanical(transmission tech? provided by watermills, windmills, horse-powered wheels)-steam-diesel/electrical-programmed-AI
+8) Other technology chains: agricultural, transport, weaponry
+9) To simplify settlement's economy. No need in commodities (? - may be we still need it, since crafters produce tools (and weapons in perspective), needs, prices. Urban hex and its worked hexes all have expected income, based on income/number of people. Buildings, weapon orders are added to crafter's income pool. Crafters' income = sum of non-food expenses of all people in the settlement + export - import
+10) To add Wood resource, - spent on buildings, fuel (to smelt metals?). Need water to transport
+11) Trade. Can be 1-way, - traders from city A allowed into B, but not other way around. Thus A has export, but no import from B (as a result of negotiations), - as a result A interested in B safety (has its interests there).
+12) Every town has competitiveness coefficient. It is ~productiveness/cost of life. The better tools and poorer crafters, the better
+13) Add commercial enterprices, - ships, mines, factories. Established when enough capital accumulated by population. Generate wealth; provide jobs; cover demands -done
+14) Show tutorial texts
+15) Add AI hunters-raiders (like barbarians in civ)
+16) Add Levels of wealth. Needs to be unlocked with technology; defines level of living expenses. Decrease competitive strength of the town, but increase loyalty (acceptable taxes) and natural growth - done
+17) Remove hunter profession/wild game resource?                
+
+
+Things to implement (must be there):
+1) Trade (competitive power for cities);
+2) Full list of techs
+3) Full list of equipment;
+4) battles;
+
+
+---------------
+0) TO decide if we are to merge all crafters into 1 profession.
+--YES, LETS DO!
+Pro:
+
+1) Simpler user interface; 
+2) Simpler calculations inside the settlement, especially when selecting occupation for new people;
+3) Simpler trade algorithms;
+4) Less dispersed player's attention
+5) No need to make materials' chains (commodity used as a resource for commodity)
+6) Historically valid, - crafters is a small proportion of population, why divide and focus on technicalities? Also, we cannot realistically cover all crafts, so they'll be abstract anyway
+
+Contra:
+1) Hard to link abstract crafter to resources, - probably, no resource?
+2) less difference between different nature environments; hard to make nature-driven trade
+3) Possibly, minimal link between craft and trade patterns

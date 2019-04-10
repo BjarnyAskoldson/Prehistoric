@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+
+<AnchorPane prefHeight="684.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.GUI.MainScreen">
+  <children>
+    <BorderPane layoutX="0.0" layoutY="25.0" prefHeight="600.0" prefWidth="1024.0">
+      <bottom>
+        <HBox prefHeight="100.0" prefWidth="200.0">
+          <children>
+            <Pane fx:id="highlightedTile" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" />
+            <Pane prefHeight="200.0" prefWidth="200.0">
+              <children>
+                <Label fx:id="activeObjectLabel" layoutX="14.0" layoutY="14.0" prefWidth="131.0" text="No settlement selected" />
+                <Button layoutX="14.0" layoutY="40.0" mnemonicParsing="false" onAction="#activateNewSettlement" text="Create new settlement" />
+              </children>
+            </Pane>
+          </children>
+        </HBox>
+      </bottom>
+         <center>
+            <StackPane prefHeight="561.0" prefWidth="1024.0" BorderPane.alignment="TOP_CENTER">
+               <children>
+                  <ScrollPane prefHeight="200.0" prefWidth="200.0">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+                    </content>
+                  </ScrollPane>
+                  <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="800.0" spacing="10.0" StackPane.alignment="TOP_LEFT">
+                     <children>
+                    <Button fx:id="pauseButton" mnemonicParsing="false" onAction="#pauseButtonAction" text="&gt;" />
+                    <Slider id="timeSlider" fx:id="timeSpeedSlider" maxHeight="-Infinity" maxWidth="-Infinity" min="1.0" minHeight="-Infinity" minWidth="-Infinity" prefWidth="204.0" showTickLabels="false" showTickMarks="true" />
+                    <Label fx:id="generalTaxLabel" prefWidth="103.0" text="General tax" />
+                    <Slider id="taxSlider" fx:id="generalTaxSlider" prefWidth="165.0" />
+                    <Label fx:id="treasuryLabel" prefWidth="145.0" text="Label" />
+                     </children>
+                     <StackPane.margin>
+                        <Insets />
+                     </StackPane.margin>
+                  </HBox>
+               </children>
+            </StackPane>
+         </center>
+    </BorderPane>
+    <Pane layoutX="0.0" layoutY="0.0" prefHeight="25.0" prefWidth="1024.0">
+      <children>
+        <MenuBar layoutX="0.0" layoutY="0.0">
+          <menus>
+            <Menu mnemonicParsing="false" text="File">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#saveGame" text="Save">
+                  <accelerator>
+                    <KeyCodeCombination alt="ANY" code="S" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                  </accelerator>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#loadGame" text="Load Game" />
+                <MenuItem mnemonicParsing="false" text="Close" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Edit">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Delete" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+              <items>
+                <MenuItem mnemonicParsing="false" text="About" />
+              </items>
+            </Menu>
+          </menus>
+        </MenuBar>
+      </children>
+    </Pane>
+  </children>
+</AnchorPane>

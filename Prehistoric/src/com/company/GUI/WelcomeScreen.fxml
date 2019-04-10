@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="176.0" prefWidth="427.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.company.GUI.WelcomeScreen">
+  <children>
+    <Label layoutX="27.0" layoutY="50.0" text="How will we call our tribe, chief?" />
+    <TextField fx:id="tribeTextField" layoutX="211.0" layoutY="47.0" prefWidth="200.0" />
+    <Label layoutX="27.0" layoutY="91.0" text="...and our first village, chief?" />
+    <TextField fx:id="villageTextField" layoutX="211.0" layoutY="91.0" prefWidth="200.0" />
+    <Button layoutX="350.0" layoutY="142.0" mnemonicParsing="false" onAction="#startGame" text="So be it" />
+  </children>
+</AnchorPane>

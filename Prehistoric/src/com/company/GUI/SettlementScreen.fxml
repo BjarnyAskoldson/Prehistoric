@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.GUI.SettlementScreen">
+  <children>
+    <TabPane layoutX="0.0" layoutY="0.0" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
+      <tabs>
+        <Tab text="Main">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <children>
+                <Label layoutX="23.0" layoutY="122.0" text="Starvations last turn:" />
+                <Label fx:id="starvationLabel" labelFor="$starvationLabel" layoutX="149.0" layoutY="125.0" prefWidth="76.0" text="0" textAlignment="RIGHT" />
+                <Label layoutX="23.0" layoutY="40.0" text="Food reserves:" />
+                <Label fx:id="foodReservesLabel" layoutX="148.0" layoutY="43.0" prefWidth="76.0" text="0" textAlignment="RIGHT" />
+                <Label layoutX="23.0" layoutY="62.0" text="Food produced:" />
+                <Label fx:id="foodProducedLabel" layoutX="148.0" layoutY="62.0" prefWidth="84.0" text="0" textAlignment="RIGHT" />
+                <Label layoutX="23.0" layoutY="91.0" text="People:" />
+                <Label fx:id="peopleLabel" layoutX="149.0" layoutY="94.0" minWidth="3.0" prefWidth="84.0" text="0" textAlignment="RIGHT" />
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Professions">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <children>
+                <ListView fx:id="workingGroupListView" layoutX="13.0" layoutY="114.0" prefHeight="200.0" prefWidth="361.0" />
+                <Label layoutX="21.0" layoutY="83.0" text="People by profession" />
+                <Label fx:id="idlePeopleLabel" layoutX="14.0" layoutY="347.0" text="Unemployed: 0" />
+                <TextField id="nameLabel" fx:id="nameTextField" layoutX="14.0" layoutY="11.0" onAction="#renameVillage" prefWidth="200.0" />
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Assets">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <children>
+                <ListView fx:id="assetsListView" layoutX="24.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" />
+                        <Label fx:id="wealthLevels" layoutX="272.0" layoutY="14.0" text="Label" />
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Troops">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <children>
+                <Button fx:id="createArmyButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#createArmy" text="Create/edit army" />
+                <ListView fx:id="armyListView" layoutX="14.0" layoutY="47.0" prefHeight="200.0" prefWidth="200.0" />
+                <ListView fx:id="equipmentListView" layoutX="223.0" layoutY="47.0" prefHeight="200.0" prefWidth="363.0" />
+                <Label layoutX="223.0" layoutY="18.0" text="Armoury" />
+                <Button fx:id="orderEquipmentButton" layoutX="532.0" layoutY="18.0" mnemonicParsing="false" onAction="#orderEquipment" prefWidth="54.0" text="Order" />
+                <ComboBox fx:id="equipmentToOrderCombobox" layoutX="270.0" layoutY="18.0" prefHeight="21.0" prefWidth="127.0">
+                  <items>
+                    <FXCollections fx:factory="observableArrayList" />
+                  </items>
+                </ComboBox>
+                <Slider fx:id="amountToOrderSlider" layoutX="398.0" layoutY="21.0" prefWidth="97.0" />
+                <Label fx:id="amountToOrderLabel" contentDisplay="TOP" labelFor="$amountToOrderSlider" layoutX="495.0" layoutY="22.0" text="0" />
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Budget">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+          </content>
+        </Tab>
+      </tabs>
+    </TabPane>
+  </children>
+</AnchorPane>
