@@ -15,6 +15,7 @@ Coal
 Oil
 Aluminium
 Uran
+?
 
 2) Enterprices compete with crafters; wages there = avg income of crafter; effectiveness higher due to machinery. Difference = profit.
 
