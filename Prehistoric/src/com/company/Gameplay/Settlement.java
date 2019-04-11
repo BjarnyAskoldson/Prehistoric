@@ -437,18 +437,34 @@ public class Settlement implements Serializable {
     	//To do: filter by resources; add assets available for sale by trade partners
     	//iterating through already-invented assets
     	for (Asset asset: owner.getAssetsAvailable()) {
-    		if (asset.getEffectiveness()>result.getEffectiveness()) {
-    			boolean allMaterialsAvailable = true;
-    			//check that all materials are available; if any are missing, asset is not considered as a goal by enterprises 
-    			for (Map.Entry<IProducible, Integer> material: asset.getMaterials().entrySet())
-    				if (commodityPerTurn(material.getKey(),true)<=0)
-    					allMaterialsAvailable = false;
-    			if (allMaterialsAvailable)
-    				result = asset;
+    		//best asset is the one that have maximum  all resources available
+    		if (asset.getEffectiveness()>result.getEffectiveness()&&resourcesAvailable(asset)!=0) {
+   				result = asset;
     		}
     	}
     	return result;
     		
+    }
+    /**
+     * Method to check resource limitations for a given product 
+     * @param product product to check
+     * @return Amount resources available to village. If -1, - resources are unlimited/not needed
+     */
+    protected int resourcesAvailable(IProducible product) {
+    	int result = -1;
+    	//Recursively check what is minimal material available
+		for (Map.Entry<IProducible, Integer> material: product.getMaterials().entrySet()) {
+			if (result==-1 || resourcesAvailable(material.getKey())<result)
+				result = resourcesAvailable(material.getKey());
+		}
+		//If product is a resource, check how many do we have
+		if(product instanceof Resource) {
+			for (Hex hex: workingHexes)
+				result += hex.getResources().getOrDefault(product, 0);
+		}
+			 
+    	return result;
+    	
     }
     
     private int getDemand(IProducible commodity) {
