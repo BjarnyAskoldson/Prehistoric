@@ -195,7 +195,7 @@ public class HexMap/* extends Application*/ {
                     }
 
                     //Now, mark working hexes (camps)
-                    HashSet<Hex> workingHexes = settlement.getWorkingHexes();
+                    HashSet<Hex> workingHexes = new HashSet<Hex>(settlement.getWorkingHexes());
                     for (Hex workingHex : workingHexes) {
                         if (workingHex.getImageView()==null && workingHex.getSettlement()==null) {
                             image = new ImageView();

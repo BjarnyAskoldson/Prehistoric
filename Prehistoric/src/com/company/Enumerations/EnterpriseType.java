@@ -30,6 +30,7 @@ public enum EnterpriseType implements IProducible {
 
 	static {
 		Farm.ResourceInput.add(Resource.arableLand);
+		Builder.ResourceInput.add(Resource.wood);
 		ShallowMine.ResourceInput.add(Resource.flintStone);
 	}
 

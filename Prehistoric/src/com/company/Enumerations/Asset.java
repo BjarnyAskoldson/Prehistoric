@@ -1,4 +1,5 @@
 package com.company.Enumerations;
+//import java.util.Comparator;
 import java.util.HashMap;
 
 import com.company.Interfaces.IProducible;
@@ -52,6 +53,7 @@ public enum Asset implements IProducible {
     	FlintTools.materials.put(Resource.flintStone, 1);
     	
     }
+    
     
     private Asset(String name, SectorType sector, double operationalCosts,  double defaultSalary, double laboriousness, double effectiveness, EnterpriseType enterpriseType, int workers) {
     	this.name = name;

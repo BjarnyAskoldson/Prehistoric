@@ -26,6 +26,11 @@ public class Enterprise implements Serializable {
 	
 	}
 
+	@Override
+	public String toString() {
+		String result = enterpriseType.getName() + " using " + asset.getName();
+		return result;
+	}
 	public Asset getAsset() {
 		return asset;
 	}

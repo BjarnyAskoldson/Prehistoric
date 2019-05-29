@@ -217,9 +217,11 @@ public class SettlementScreen implements Initialisable {
         });
 
         equipmentToOrderCombobox.valueProperty().addListener((observable, oldValue, newValue) -> {
-
-            // set range for order amount on equipment selected
-            amountToOrderSlider.setMax((double) (settlement.getSettlementTreasury()/((IProducible)newValue).getLaboriousness()));
+        	if (newValue != null)
+	            // set range for order amount on equipment selected
+	            amountToOrderSlider.setMax((double) (settlement.getSettlementTreasury()/((IProducible)newValue).getLaboriousness()));
+        	else
+        		amountToOrderSlider.setMax(0);
         });
 
         nameTextField.textProperty().addListener((observable, oldValue, newValue) -> {

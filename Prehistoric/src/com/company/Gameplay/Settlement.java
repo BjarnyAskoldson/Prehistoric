@@ -2,6 +2,7 @@ package com.company.Gameplay;
 
 import com.company.Enumerations.*;
 import com.company.Interfaces.IProducible;
+import com.company.AssetsComparator;
 import com.company.HexMap;
 import com.company.hexgame;
 import javafx.application.Platform;
@@ -431,7 +432,72 @@ public class Settlement implements Serializable {
 //            }
 //        }
 //    }
+
+	/**
+	 * Method to distribute capital available by assets that can be produced with a given resources
+	 * @param capitalAvailable Capital to distribute
+	 * @return list of assets to purchase
+	 */
+    protected HashMap<Asset, Integer> assetsOnGivenResources() {
+    	HashMap<Asset, Integer> result = new HashMap<>();
+    	//First, get list of assets already invented by the tribe
+    	Asset[] array = Asset.values();//(Asset[]) owner.getAssetsAvailable().toArray();//
+    	AssetsComparator c = new AssetsComparator();
+    	Arrays.sort(array, c);  
+    	//now, check what we can produce with our resources
+		int amountOfAssetToProduce = 0; 
+    	for (Asset asset: array) {
+    		if (owner.getAssetsAvailable().contains(asset)) {
+	    		int resourcesAvailable = resourcesAvailable(asset);
+    			//...otherwise, by resources
+    			amountOfAssetToProduce = resourcesAvailable;	    		
+	    		result.put(asset, amountOfAssetToProduce);
+    		}
+    	}
+    		
+    	//TreeSet<Asset> assetsAvailableByTechnology = new TreeSet<>()//owner.getAssetsAvailable(),);
+    	//assetsAvailableByTechnology.comparator(). new Comparator<Asset>
+    	return result;
+    }
     
+
+	/**
+	 * Method to distribute capital available by assets that can be produced with a given resources
+	 * @param capitalAvailable Capital to distribute
+	 * @return list of assets to purchase
+	 */
+    protected HashMap<Asset, Integer> distributeCapitalByAssets(int capitalToInvest) {
+    	HashMap<Asset, Integer> result = new HashMap<>();
+    	//First, get list of assets already invented by the tribe
+    	Asset[] array = Asset.values();//(Asset[]) owner.getAssetsAvailable().toArray();//
+    	AssetsComparator c = new AssetsComparator();
+    	Arrays.sort(array, c);  
+    	//now, check what we can produce
+		int amountOfAssetToProduce = 0; 
+    	for (Asset asset: array) {
+    		if (owner.getAssetsAvailable().contains(asset)) {
+	    		int resourcesAvailable = resourcesAvailable(asset);
+	    		if (resourcesAvailable==-1||capitalToInvest<(resourcesAvailable*asset.getLaboriousness()))
+	    			//if we don't need resources or have more capital than resources, amount of assets limited by capital... 
+	    			amountOfAssetToProduce = (int) (capitalToInvest/asset.getLaboriousness());
+	    		else
+	    			//...otherwise, by resources
+	    			amountOfAssetToProduce = resourcesAvailable;
+	    		
+	    		result.put(asset, amountOfAssetToProduce);
+	    		capitalToInvest -= amountOfAssetToProduce*asset.getLaboriousness();
+    		}
+    	}
+    		
+    	//TreeSet<Asset> assetsAvailableByTechnology = new TreeSet<>()//owner.getAssetsAvailable(),);
+    	//assetsAvailableByTechnology.comparator(). new Comparator<Asset>
+    	return result;
+    }
+
+    /**
+	 * Method to return best asset available by resources and technology
+	 * @return
+	 */
     protected Asset getBestAsset() {
     	Asset result = Asset.StoneTools;
     	//To do: filter by resources; add assets available for sale by trade partners
@@ -448,17 +514,19 @@ public class Settlement implements Serializable {
     /**
      * Method to check resource limitations for a given product 
      * @param product product to check
-     * @return Amount resources available to village. If -1, - resources are unlimited/not needed
+     * @return Amount of product that can be produced with resources available in the village. If -1, - resources are unlimited/not needed
      */
     protected int resourcesAvailable(IProducible product) {
     	int result = -1;
     	//Recursively check what is minimal material available
 		for (Map.Entry<IProducible, Integer> material: product.getMaterials().entrySet()) {
-			if (result==-1 || resourcesAvailable(material.getKey())<result)
-				result = resourcesAvailable(material.getKey());
+			int productByresourcesPossible = (int)((double)(resourcesAvailable(material.getKey()))/material.getValue());
+			if (result==-1 || productByresourcesPossible<result)
+				result = productByresourcesPossible;
 		}
 		//If product is a resource, check how many do we have
 		if(product instanceof Resource) {
+			result = 0;
 			for (Hex hex: workingHexes)
 				result += hex.getResources().getOrDefault(product, 0);
 		}
@@ -630,7 +698,7 @@ public class Settlement implements Serializable {
 //            result =bufferGroup.get();
 //        return result;
 //    }
-
+    
     /**
      * Method to distribute idle people, - first by vital needs, then non-vital, then recruiting into army if no vacancies
      */
@@ -665,7 +733,31 @@ public class Settlement implements Serializable {
       	for (WorkingGroup wg: workingGroups) {
       		wg.addPeople((int)(coeffPeopleAvailable* wg.getVacancies()));
       	}
-      	//  	
+
+        //people that still don't have a job join an army, if any recruiting
+        HashSet<Army> armiesToIterate = new HashSet<>(armies);
+        for (Army army : armiesToIterate)
+            if (army.getLocation().equals(this.location)&& army.getPeople()<army.getPeopleMax()) {
+                //army recruiting if it is at home base and needs people
+                int peopleAvailable = getIdlePeople();
+                int peopleNeeded = army.getPeopleMax() - army.getPeople();
+                int newRecruits = peopleAvailable>peopleNeeded ? peopleNeeded : peopleAvailable;
+                for (Map.Entry<Equipment, Integer> equipmentToAssign : army.getEquipment().entrySet()) {
+                    //Assign all equipment currently in the army
+                    int equipmentAlreadyInUse = army.getEquipmentInUse().getOrDefault(equipmentToAssign.getKey(),0);
+                    int equipmentNotInUse = equipmentToAssign.getValue() - equipmentAlreadyInUse;
+                    int peopleNeededOnEquipment = equipmentNotInUse*equipmentToAssign.getKey().getPeopleToOperate();
+                    int equipmentToUse = (peopleNeededOnEquipment<newRecruits ? peopleNeededOnEquipment : newRecruits)/equipmentToAssign.getKey().getPeopleToOperate();
+                    army.getEquipmentInUse().put(equipmentToAssign.getKey(), equipmentAlreadyInUse+equipmentToUse);
+                    army.addPeople(equipmentToUse*equipmentToAssign.getKey().getPeopleToOperate());
+                    this.people -= equipmentToUse*equipmentToAssign.getKey().getPeopleToOperate();
+                    newRecruits -= equipmentToUse*equipmentToAssign.getKey().getPeopleToOperate();
+                    if (newRecruits <=0)
+                        break;
+                }
+            }
+
+      	
 //        //first, check the satisfaction of the vital needs
 //    	
 //    	//add people from all buffer group into pool to distribute
@@ -869,29 +961,6 @@ public class Settlement implements Serializable {
 //                }
 //            }
 //        }
-//
-//        //people that still don't have a job join an army, if any recruiting
-//        HashSet<Army> armiesToIterate = new HashSet<>(armies);
-//        for (Army army : armiesToIterate)
-//            if (army.getLocation().equals(this.location)&& army.getPeople()<army.getPeopleMax()) {
-//                //army recruiting if it is at home base and needs people
-//                int peopleAvailable = getIdlePeople();
-//                int peopleNeeded = army.getPeopleMax() - army.getPeople();
-//                int newRecruits = peopleAvailable>peopleNeeded ? peopleNeeded : peopleAvailable;
-//                for (Map.Entry<Equipment, Integer> equipmentToAssign : army.getEquipment().entrySet()) {
-//                    //Assign all equipment currently in the army
-//                    int equipmentAlreadyInUse = army.getEquipmentInUse().getOrDefault(equipmentToAssign.getKey(),0);
-//                    int equipmentNotInUse = equipmentToAssign.getValue() - equipmentAlreadyInUse;
-//                    int peopleNeededOnEquipment = equipmentNotInUse*equipmentToAssign.getKey().getPeopleToOperate();
-//                    int equipmentToUse = (peopleNeededOnEquipment<newRecruits ? peopleNeededOnEquipment : newRecruits)/equipmentToAssign.getKey().getPeopleToOperate();
-//                    army.getEquipmentInUse().put(equipmentToAssign.getKey(), equipmentAlreadyInUse+equipmentToUse);
-//                    army.addPeople(equipmentToUse*equipmentToAssign.getKey().getPeopleToOperate());
-//                    this.people -= equipmentToUse*equipmentToAssign.getKey().getPeopleToOperate();
-//                    newRecruits -= equipmentToUse*equipmentToAssign.getKey().getPeopleToOperate();
-//                    if (newRecruits <=0)
-//                        break;
-//                }
-//            }
 //
     }
     
@@ -1272,26 +1341,28 @@ public class Settlement implements Serializable {
 		//Here, we calculate demand for end user products only. Demand for assets, weapons added elsewhere
 		for (Commodity commodity: Commodity.values())
 			demand.put(commodity, getDemand(commodity));
+		
+		HashSet<WorkingGroup> workingGroupsCopy = new HashSet<>(workingGroups);
+		
+		//To do: add demand on assets, - move from WOrkGroup class, to improve traceability
+		for  (WorkingGroup wg: workingGroupsCopy) {
+			for (Map.Entry<Asset, Integer> asset: wg.getPlannedUpgrades().entrySet())
+				addDemand(asset.getKey(),asset.getValue());
+			
+			for (Map.Entry<Enterprise, Double> asset: wg.getPlannedNewEnterprises().entrySet()) {
+				addDemand(asset.getKey().getEnterpriseType(),asset.getValue().intValue());
+				addDemand(asset.getKey().getAsset(),asset.getValue().intValue());
+			}
+		}
 	}
 	
-	private double sectorDemandShare(SectorType sectorType) {
-		double result = 0;
-		//Sum of all positive demands, to calculate share for a given sector
-		Optional<Integer> totalDemandOpt = demand.entrySet().stream()
-				.filter(a->a.getValue()>0)
-				.map(a->(int)(a.getValue()*a.getKey().getLaboriousness()))
-				.reduce(Integer::sum);
-		
-		int totalDemand = totalDemandOpt.isPresent() ? totalDemandOpt.get() : 0;
-		
-		//Sum all supply, to calculate uncovered demand
-		Optional<Integer> totalSupplyOpt = workingGroups.stream()
-				.map(a->a.getTotalPotentialProductivity())
-				.reduce(Integer::sum);
-		int totalSupply = totalSupplyOpt.isPresent() ? totalSupplyOpt.get() : 0;
-		int totalUncoveredDemand = totalDemand-totalSupply;
-		
-		
+	/**
+	 * 
+	 * @param sectorType
+	 * @return
+	 */
+	private int sectorUncoveredDemand(SectorType sectorType) {
+		int result = 0;
 		Optional<Integer> sectorDemandOpt = demand.entrySet().stream()	
 				.filter(a->a.getKey()!=null)
 				//we need to consider positive demand only, - otherwise negative demands can hide existing ones 
@@ -1306,7 +1377,33 @@ public class Settlement implements Serializable {
 				.map(a->a.getTotalPotentialProductivity())
 				.reduce(Integer::sum);
 		int sectorSupply = sectorSupplyOpt.isPresent() ? sectorSupplyOpt.get() : 0;
-		double sectorUncoveredDemand = sectorDemand-sectorSupply;
+		result = (int) (sectorDemand>sectorSupply? (sectorDemand-sectorSupply): 0.0);
+		
+		return result;
+	}
+	
+	private double sectorDemandShare(SectorType sectorType) {
+		double result = 0;
+		//Sum of all positive demands, to calculate share for a given sector
+//		Optional<Integer> totalDemandOpt = demand.entrySet().stream()
+//				.filter(a->a.getValue()>0)
+//				.map(a->(int)(a.getValue()*a.getKey().getLaboriousness()))
+//				.reduce(Integer::sum);
+//		
+//		int totalDemand = totalDemandOpt.isPresent() ? totalDemandOpt.get() : 0;
+//		
+//		
+//		//Sum all supply, to calculate uncovered demand
+//		Optional<Integer> totalSupplyOpt = workingGroups.stream()
+//				.map(a->a.getTotalPotentialProductivity())
+//				.reduce(Integer::sum);
+//		int totalSupply = totalSupplyOpt.isPresent() ? totalSupplyOpt.get() : 0;
+		
+		int totalUncoveredDemand = 0;//totalDemand-totalSupply;
+		for (SectorType sectorTypeLocal : SectorType.values())
+			totalUncoveredDemand += sectorUncoveredDemand(sectorTypeLocal);
+		
+		double sectorUncoveredDemand = sectorUncoveredDemand(sectorType);
 		result = totalUncoveredDemand == 0 ? 0 : sectorUncoveredDemand/totalUncoveredDemand;
 		//result = totalDemand == 0 ? 0 : sectorDemand/totalDemand;
 		return result;

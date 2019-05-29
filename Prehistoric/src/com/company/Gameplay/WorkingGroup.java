@@ -54,6 +54,21 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 //    private HashMap<Equipment, Integer> equipment = new HashMap<>();
 //    private Equipment equipmentToGet;
 
+    /**
+     * Returns enterprises' upgrades planned for next year for a given working group
+     * @return list of assets enterprises want to buy 
+     */
+    public HashMap<Asset, Integer> getPlannedUpgrades() {
+    	return plannedUpgrades;
+    }
+    
+    /**
+     * Returns enterprises' upgrades planned for next year for a given working group
+     * @return list of assets enterprises want to buy 
+     */
+    public HashMap<Enterprise, Double> getPlannedNewEnterprises() {
+    	return plannedNewEnterprises;
+    }
 
     @Override
     public boolean isMissionCompleted() {
@@ -572,7 +587,7 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
         this.resource = resource;
 //        this.need = need;
         this.sectorType = sectorType;
-        this.location = homebase.getLocation();
+        this.location = camp;//homebase.getLocation();
         this.homebase = homebase;
         this.aggressive = aggressive;
 //        this.type = type;
@@ -672,8 +687,10 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 			//If we still have some capital, establish new enterprises
 				capitalToInvest = scheduleNewEnterprisesNextYear(capitalToInvest);
 		}
+		
 		updateWealthLevels();
-		this.shrinkWorkGroup();
+		//this.shrinkWorkGroup();
+		processStateOrders();
 		
 		//clean buildings' and assets' demand for this year, to start from 0 on the next year
 		
@@ -696,14 +713,21 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 		//savings = capitalToInvest;
 		
 	}
-	/*
-	 * Change work group size according to financial results, - expand if profitable, shrink otherwise
+	
+	/**
+	 * Method to process state orders, - public buildings, army equipment etc.
 	 */
-	public void recalculateWorkGroupSize() {
-		upgradeEnterprises();
-		establishNewEnterprises();
-		shrinkWorkGroup();
+	private void processStateOrders() {
+		//TO DO!!!
 	}
+//	/**
+//	 * Change work group size according to financial results, - expand if profitable, shrink otherwise
+//	 */
+//	public void recalculateWorkGroupSize() {
+//		upgradeEnterprises();
+//		establishNewEnterprises();
+//		shrinkWorkGroup();
+//	}
 	
 	/*
 	 * Close enterprises if unprofitable
@@ -731,14 +755,14 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 			  });
 			
 			  //Now iterate through sorted list, - from least efficient enterprises to most efficient
-			  double uncoveredLoss = 0;
+			  double uncoveredLoss = profit;//0;
 			      for (Map.Entry<Enterprise, Double> enterprise : list) {
 			    	  double enterpriseExpenses = getEnterpriseExpenses(enterprise.getKey());
 			    	  int enterprisesCurrentlyExisting = enterprises.getOrDefault(enterprise.getKey(),0);
-			          int enterprisesToClose = uncoveredLoss > enterpriseExpenses ? 
+			          int enterprisesToClose = Math.abs(uncoveredLoss) > enterpriseExpenses ? 
 			        		  enterprisesCurrentlyExisting 
-			        		  : (int)(enterprisesCurrentlyExisting*uncoveredLoss/enterpriseExpenses);
-	        		  uncoveredLoss -= enterprisesToClose/enterprisesCurrentlyExisting*enterpriseExpenses;
+			        		  : (int)(enterprisesCurrentlyExisting*(uncoveredLoss/enterpriseExpenses));
+	        		  uncoveredLoss -= enterprisesCurrentlyExisting == 0 ? 0 :(enterprisesToClose/enterprisesCurrentlyExisting)*enterpriseExpenses;
 	        		  enterprises.put(enterprise.getKey(), enterprisesCurrentlyExisting - enterprisesToClose);
 			      }
 				
@@ -760,6 +784,7 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 		
 		Optional <Integer> totalBuildingDemandOptional = homebase.getDemand().entrySet().stream()
 				.filter(a->a.getValue()>0)
+				.filter(a->a.getKey().getSector().equals(SectorType.Construction))
 				.map(a->a.getValue())
 				.reduce(Integer::sum);
 		int totalBuildingDemand = totalBuildingDemandOptional.isPresent() ? totalBuildingDemandOptional.get() : 0;
@@ -783,11 +808,17 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 			if (newEnterprise.getValue()+enterprises.getOrDefault(newEnterprise.getKey(), 0)>0) {
 				double enterprisesToEstablish = newEnterprise.getValue()*buildersAvailableCoefficient;
 				plannedNewEnterprises.put(newEnterprise.getKey(), plannedNewEnterprises.getOrDefault(newEnterprise.getKey(), 0.0)-enterprisesToEstablish);
+							
 				enterprises.put(newEnterprise.getKey(), enterprises.getOrDefault(newEnterprise.getKey(), 0)+(int)Math.round(enterprisesToEstablish));
 				
-				//Decrease the demand on assets and buildings, since the projects were completed
-				homebase.addDemand(newEnterprise.getKey().getAsset(),-1*(int)Math.round(enterprisesToEstablish));
-				homebase.addDemand(newEnterprise.getKey().getEnterpriseType(),-1*(int)Math.round(enterprisesToEstablish));
+				if (enterprisesToEstablish>0) {
+					//decrease the homebase's capital
+					int capitalSpent = (int)((newEnterprise.getKey().getAsset().getLaboriousness()+newEnterprise.getKey().getEnterpriseType().getLaboriousness())*Math.round(enterprisesToEstablish));
+					homebase.setCapital(homebase.getCapital()-capitalSpent);
+				}
+				//Decrease the demand on assets and buildings, since the projects were completed -  to remove? We probably need to set demand on assets to 0 every turn
+//				homebase.addDemand(newEnterprise.getKey().getAsset(),-1*(int)Math.round(enterprisesToEstablish));
+//				homebase.addDemand(newEnterprise.getKey().getEnterpriseType(),-1*(int)Math.round(enterprisesToEstablish));
 			} else {
 				enterprises.put(newEnterprise.getKey(),0);			
 				plannedNewEnterprises.remove(newEnterprise.getKey());
@@ -817,11 +848,16 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 				.map(a->a.getTotalPotentialProductivity())
 				.reduce(Integer::sum);
 		int totalProductivity = totalProductivityOpt.isPresent() ? totalProductivityOpt.get() : 0;
-		double groupShareInMarket = totalProductivity == 0 ? 1 : (double)this.getTotalPotentialProductivity()/totalProductivity;
-		result = totDemandOptional.isPresent() ? totDemandOptional.get()*groupShareInMarket : 0;
+		int totalDemand = (int) (totDemandOptional.isPresent() ? totDemandOptional.get() : 0);
+		//result is equal to demand not covered yet for every group, - i.e. it is distributed in order of working groups in the collection. 
+		//We cannot distribute by productivity, since new hexes would have 0 of it, thus never get any share in demand
+		result = totalDemand - totalProductivity;
+//		double groupShareInMarket = totalProductivity == 0 ? 1 : (double)this.getTotalPotentialProductivity()/totalProductivity;
+//		result = totDemandOptional.isPresent() ? totDemandOptional.get()*groupShareInMarket : 0;
 		//For agriculture, decrease demand by wild game caught
-		if (sectorType.equals(SectorType.Agriculture))
-			result -= homebase.getIdlePeopleYield();
+		//commented out for sake of experiment, - lets replace hunters with farmers wherever we can
+//		if (sectorType.equals(SectorType.Agriculture))
+//			result -= homebase.getIdlePeopleYield();
 		return result;
 	}
 
@@ -829,46 +865,74 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 	 * starts new enterprises' projects with capital, resources and labor pool available. Returns capital unspent
 	 */
 	private int scheduleNewEnterprisesNextYear(int capitalToInvest) {
-		Asset assetToAdd = homebase.getBestAsset();
-		EnterpriseType enterpriseType = assetToAdd.getEntepriseType(sectorType); 
-		//Check how many new enterprises capital limit allows
-		int EnterprisesToEstablishByCapital = (int)(capitalToInvest/assetToAdd.getLaboriousness());
-		//Check how many new enterprises demand limit allows
-		int EnterprisesToEstablishByDemand = (int)((getTotalGroupDemand() - getTotalPotentialProductivity())/(assetToAdd.getEffectiveness()*assetToAdd.getWorkers()));
-		//If the enterprises to establish should have resource input, their amount will be limited by the resources available 
-		Optional<Integer> enterprisesAlreadyOnResourceOptional = enterprises.entrySet().stream()
-				.filter(a->a.getKey().getEnterpriseType().equals(enterpriseType))
-				.map(a->(int)(a.getValue()*a.getKey().getAsset().getEffectiveness()))
-				.reduce(Integer::sum);
-		int enterprisesAlreadyOnResource = enterprisesAlreadyOnResourceOptional.isPresent() ? enterprisesAlreadyOnResourceOptional.get() : 0;
-		int EnterprisesToEstablishByResource = enterpriseType.getResourceInput().size()!=0 ? -1*enterprisesAlreadyOnResource : EnterprisesToEstablishByDemand;
-		for (IProducible resource: enterpriseType.getResourceInput())
-			EnterprisesToEstablishByResource += location.getResources().getOrDefault(resource, 0);
-		int EnterprisesToEstablishByLabor = (int)(homebase.getWorkforceIntoSector(sectorType)/assetToAdd.getWorkers());
-		//now, check all the limits and schedule the start for enterprises that is within all limits (by capital, labor, demand and resource) 
-		int enterprisesToEstablish = EnterprisesToEstablishByDemand;
-		//check capital available...
-		if (EnterprisesToEstablishByCapital<enterprisesToEstablish)
-			enterprisesToEstablish = EnterprisesToEstablishByCapital;
-		//check Labor available...
-		if (EnterprisesToEstablishByLabor<enterprisesToEstablish)
-			enterprisesToEstablish = EnterprisesToEstablishByLabor;
-		//check Resources available...
-		if (EnterprisesToEstablishByResource<enterprisesToEstablish && enterpriseType.getResourceInput().size()!=0)
-			enterprisesToEstablish = EnterprisesToEstablishByResource;
+		//Asset assetToAdd = homebase.getBestAsset();
+		//First, check how many enterprises we can establish by resources needed on assets
+		HashMap <Asset, Integer> assetsToAdd = homebase.assetsOnGivenResources();
 		
-		//Add demand for given type of enterprise (for Construction sector)
-		homebase.addDemand(enterpriseType, enterprisesToEstablish);
-		//Add demand for given type of asset (for light industry/machine building sector)
-		homebase.addDemand(assetToAdd, enterprisesToEstablish);
-		Enterprise enterpriseToAdd=null;
-		for (Enterprise enterprise: enterprises.keySet())
-			if (enterprise.getAsset().equals(assetToAdd)&enterprise.getEnterpriseType().equals(enterpriseType))
-				enterpriseToAdd = enterprise;
-		if (enterpriseToAdd==null)
-			enterpriseToAdd = new Enterprise(enterpriseType,assetToAdd);
-		plannedNewEnterprises.put(enterpriseToAdd, (double)enterprisesToEstablish);
-		//this.enterprises.put(enterprise, this.enterprises.getOrDefault(enterprise, 0)+enterprisesToEstablish);		
+		int capitalLeft = capitalToInvest;
+		int workforceLeft = homebase.getWorkforceIntoSector(sectorType);
+		int demandLeft = (int)(getTotalGroupDemand() - getTotalPotentialProductivity());
+		//int resourcesLeft = 0;
+		
+		for (Map.Entry<Asset, Integer> assetToAdd : assetsToAdd.entrySet()) { 
+			EnterpriseType enterpriseType = assetToAdd.getKey().getEntepriseType(sectorType); 
+			//Check how many new enterprises assets limit allows
+			int EnterprisesToEstablishByAssets = assetToAdd.getValue();
+
+			//Check how many new enterprises capital limit allows
+			int EnterprisesToEstablishByCapital = (int)(capitalLeft/assetToAdd.getKey().getLaboriousness());
+			//Check how many new enterprises demand limit allows
+			int EnterprisesToEstablishByDemand = (int)(demandLeft/(assetToAdd.getKey().getEffectiveness()*assetToAdd.getKey().getWorkers()));
+			//If the enterprises to establish should have resource input, their amount will be limited by the resources available 
+			Optional<Integer> enterprisesAlreadyOnResourceOptional = enterprises.entrySet().stream()
+					.filter(a->a.getKey().getEnterpriseType().equals(enterpriseType))
+					.map(a->(int)(a.getValue()*a.getKey().getAsset().getEffectiveness()))
+					.reduce(Integer::sum);
+			int enterprisesAlreadyOnResource = enterprisesAlreadyOnResourceOptional.isPresent() ? enterprisesAlreadyOnResourceOptional.get() : 0;
+			int EnterprisesToEstablishByResource = enterpriseType.getResourceInput().size()!=0 ? -1*enterprisesAlreadyOnResource : EnterprisesToEstablishByDemand;
+			for (IProducible resource: enterpriseType.getResourceInput())
+				EnterprisesToEstablishByResource += location.getResources().getOrDefault(resource, 0);
+			int EnterprisesToEstablishByLabor = (int)(workforceLeft/assetToAdd.getKey().getWorkers());
+			//now, check all the limits and schedule the start for enterprises that is within all limits (by capital, labor, demand and resource) 
+			int enterprisesToEstablish = EnterprisesToEstablishByDemand;
+			//check capital available...		
+			if (EnterprisesToEstablishByCapital<enterprisesToEstablish)
+				enterprisesToEstablish = EnterprisesToEstablishByCapital;
+			//check Labor available...
+			if (EnterprisesToEstablishByLabor<enterprisesToEstablish)
+				enterprisesToEstablish = EnterprisesToEstablishByLabor;
+			//check Assets available...
+			if (EnterprisesToEstablishByAssets<enterprisesToEstablish && EnterprisesToEstablishByAssets!=-1)
+				enterprisesToEstablish = EnterprisesToEstablishByAssets;
+			//check Resources available...
+			if (EnterprisesToEstablishByResource<enterprisesToEstablish && enterpriseType.getResourceInput().size()!=0)
+				enterprisesToEstablish = EnterprisesToEstablishByResource;
+			
+			
+			//Add demand for given type of enterprise (for Construction sector)
+//			if (!enterpriseType.getSector().equals(sectorType))
+//				homebase.addDemand(enterpriseType, enterprisesToEstablish);
+//			//Add demand for given type of asset (for light industry/machine building sector) unless it is needed by it (to avoid infinite loop)
+//			if (!assetToAdd.getKey().getSector().equals(sectorType))
+//				homebase.addDemand(assetToAdd.getKey(), enterprisesToEstablish);
+			Enterprise enterpriseToAdd=null;
+			for (Enterprise enterprise: enterprises.keySet())
+				if (enterprise.getAsset().equals(assetToAdd.getKey())&enterprise.getEnterpriseType().equals(enterpriseType))
+					enterpriseToAdd = enterprise;
+			if (enterpriseToAdd==null)
+				enterpriseToAdd = new Enterprise(enterpriseType,assetToAdd.getKey());
+			plannedNewEnterprises.put(enterpriseToAdd, (double)enterprisesToEstablish);
+			//this.enterprises.put(enterprise, this.enterprises.getOrDefault(enterprise, 0)+enterprisesToEstablish);
+
+			//Decrease remainders for all the prerequisites
+			capitalLeft -= enterprisesToEstablish * (assetToAdd.getKey().getLaboriousness() + enterpriseType.getLaboriousness());
+			demandLeft -= enterprisesToEstablish * assetToAdd.getKey().getEffectiveness()*assetToAdd.getKey().getWorkers();
+			workforceLeft -= enterprisesToEstablish * assetToAdd.getKey().getWorkers();
+			
+			//if we run out of capital, workforce or satisfied all the demand, stop establish enterprises
+			if (capitalLeft<=0 || demandLeft<=0 || workforceLeft<=0)
+				break;
+		}
 		return 0;
 	}
 	/*
@@ -876,8 +940,13 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 	 */
 	private int scheduleUpgradesNextYear(Enterprise enterpriseToUpgrade, Asset newAsset, int capitalAvailable) {
 		int result = capitalAvailable;
-		int numberOfUpgrades = (int)(capitalAvailable/newAsset.getLaboriousness());
-		homebase.addDemand(newAsset, numberOfUpgrades);
+		int numberOfUpgradesByCapital = (int)(capitalAvailable/newAsset.getLaboriousness());
+		int numberOfUpgrades = enterprises.getOrDefault(enterpriseToUpgrade, 0);
+		if (numberOfUpgradesByCapital<numberOfUpgrades)
+			numberOfUpgrades = numberOfUpgradesByCapital;
+		//Add demand for given type of asset (for light industry/machine building sector) unless it is needed by it (to avoid infinite loop)
+//		if (!newAsset.getSector().equals(sectorType))
+//			homebase.addDemand(newAsset, numberOfUpgrades);
 		plannedUpgrades.put(newAsset, numberOfUpgrades);
 		result -= newAsset.getLaboriousness()*numberOfUpgrades; 
 		return result;
@@ -889,12 +958,13 @@ public class WorkingGroup implements IAbleToFight, IMoveable, Serializable {
 		//int result = capitalAvailable;
 		for (Map.Entry<Asset, Integer> newAsset : plannedUpgrades.entrySet()) {
 			int numberOfUpgrades = newAsset.getValue();
-			for (Map.Entry<Enterprise, Integer>  enterprise : enterprises.entrySet()) {		
+			HashMap<Enterprise, Integer> exisitngEnterprises = new HashMap<>(enterprises);
+			for (Map.Entry<Enterprise, Integer>  enterprise : exisitngEnterprises.entrySet()) {		
 				if (enterprise.getKey().getAsset().getEffectiveness()>=newAsset.getKey().getEffectiveness())
 					//If enterprise already has this or better asset, don't upgrade 
 					continue;
 				else {
-					int numberOfUpgradesThisEnterprise = numberOfUpgrades > enterprise.getValue() ? numberOfUpgrades : enterprise.getValue();
+					int numberOfUpgradesThisEnterprise = numberOfUpgrades < enterprise.getValue() ? numberOfUpgrades : enterprise.getValue();
 					//decrease amount of enterprises having old asset
 					if (numberOfUpgradesThisEnterprise>=enterprise.getValue())
 						enterprises.remove(enterprise.getKey());
