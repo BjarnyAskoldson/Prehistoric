@@ -211,8 +211,17 @@ public class Settlement implements Serializable {
     public void orderEquipment (Equipment equipment, int amount) {
         //add order
         equipmentOrders.put(equipment, amount);
+//        demand.put(equipment, amount);
+        addDemandOnProductAndMaterials(equipment, amount);
         //pay costs from local treasury
         spendStateFood ((int)(equipment.getLaboriousness()*amount));
+    }
+    
+    private void produceEquipment() {
+    	for (Map.Entry<Equipment, Integer> equipmentToProduce : equipmentOrders.entrySet()) {
+    		int amountProduced = commodityPerTurn(equipmentToProduce.getKey(),false);
+    		equipment.put(equipmentToProduce.getKey(), equipment.getOrDefault(equipmentToProduce.getKey(), 0)+amountProduced);
+    	}
     }
 
     public void addPeople(int newPeople) {
@@ -511,6 +520,19 @@ public class Settlement implements Serializable {
     	return result;
     		
     }
+    
+    /**
+     * Method to add demand on the given product and all of its materials
+     * @param product - producible item to add into settlement's demand
+     * @param demandToAdd
+     */
+    protected void addDemandOnProductAndMaterials(IProducible product, int demandToAdd) {
+    	demand.put(product, demand.getOrDefault(product, 0)+demandToAdd);
+    	for (Map.Entry<IProducible, Integer> material: product.getMaterials().entrySet()) {
+        	demand.put(material.getKey(), demand.getOrDefault(material.getKey(), 0)+demandToAdd);
+    		
+    	}
+    }
     /**
      * Method to check resource limitations for a given product 
      * @param product product to check
@@ -584,9 +606,9 @@ public class Settlement implements Serializable {
     		return result;
     	int totalDemand = 0;
     	for (IProducible localCommodity : sector.getCommodities())
-    		totalDemand += getDemand(localCommodity);
+    		totalDemand += demand.getOrDefault(localCommodity, 0);//getDemand(localCommodity);
     	
-    	result = ((double)getDemand(commodity))/totalDemand;
+    	result = ((double)demand.getOrDefault(commodity, 0))/totalDemand;
     	return result;
     }
     /**
@@ -1282,6 +1304,9 @@ public class Settlement implements Serializable {
         groupsBeforeTheCalculation = new HashSet<>(workingGroups);
         for (WorkingGroup wg : groupsBeforeTheCalculation)
         	wg.processDay();
+        
+        //Now, produce military equipment ordered by state 
+        produceEquipment();
         doStarvations();
         recalculateLocalRulerReputation();
 //        consumeCommodities();
@@ -1338,20 +1363,21 @@ public class Settlement implements Serializable {
 	 * method to calculate demand for this year
 	 */
 	private void calculateDemand() {
-		//Here, we calculate demand for end user products only. Demand for assets, weapons added elsewhere
+		//calculate demand for end user products
 		for (Commodity commodity: Commodity.values())
 			demand.put(commodity, getDemand(commodity));
 		
 		HashSet<WorkingGroup> workingGroupsCopy = new HashSet<>(workingGroups);
 		
-		//To do: add demand on assets, - move from WOrkGroup class, to improve traceability
+		//add demand on assets/enterprises
 		for  (WorkingGroup wg: workingGroupsCopy) {
 			for (Map.Entry<Asset, Integer> asset: wg.getPlannedUpgrades().entrySet())
-				addDemand(asset.getKey(),asset.getValue());
+				//addDemand(asset.getKey(),asset.getValue());
+				addDemandOnProductAndMaterials(asset.getKey(),asset.getValue());
 			
 			for (Map.Entry<Enterprise, Double> asset: wg.getPlannedNewEnterprises().entrySet()) {
-				addDemand(asset.getKey().getEnterpriseType(),asset.getValue().intValue());
-				addDemand(asset.getKey().getAsset(),asset.getValue().intValue());
+				addDemandOnProductAndMaterials(asset.getKey().getEnterpriseType(),asset.getValue().intValue());
+				addDemandOnProductAndMaterials(asset.getKey().getAsset(),asset.getValue().intValue());
 			}
 		}
 	}

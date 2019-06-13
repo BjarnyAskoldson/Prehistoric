@@ -25,9 +25,11 @@ public enum Asset implements IProducible {
 		StoneTools.entepriseTypes.put(SectorType.Agriculture, EnterpriseType.Farm);
 		StoneTools.entepriseTypes.put(SectorType.LightIndustry, EnterpriseType.Workshop);
 		StoneTools.entepriseTypes.put(SectorType.Construction, EnterpriseType.Builder);
+		StoneTools.entepriseTypes.put(SectorType.Extracting, EnterpriseType.ShallowMine);
 		FlintTools.entepriseTypes.put(SectorType.Agriculture, EnterpriseType.Farm);
 		FlintTools.entepriseTypes.put(SectorType.LightIndustry, EnterpriseType.Workshop);
 		FlintTools.entepriseTypes.put(SectorType.Construction, EnterpriseType.Builder);
+		FlintTools.entepriseTypes.put(SectorType.Extracting, EnterpriseType.ShallowMine);
 		BronzeTools.entepriseTypes.put(SectorType.Agriculture, EnterpriseType.Farm);
 		BronzeTools.entepriseTypes.put(SectorType.LightIndustry, EnterpriseType.Workshop);
 		BronzeTools.entepriseTypes.put(SectorType.Construction, EnterpriseType.Builder);
